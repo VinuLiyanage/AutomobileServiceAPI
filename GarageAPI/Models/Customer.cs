@@ -1,11 +1,15 @@
-﻿using System.ComponentModel;
+﻿using Microsoft.Extensions.Hosting;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GarageAPI.Models
 {
     public class Customer
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int CustomerId { get; set; }
 
         [Required]
         [DisplayName("First Name")]
@@ -44,5 +48,7 @@ namespace GarageAPI.Models
         [StringLength(14)]
         [RegularExpression(@"\(\d{3}\) \d{3}-\d{4}")]
         public string PhoneNumber { get; set; } = String.Empty;
+
+        public ICollection<Order> Orders { get; } = new List<Order>();
     }
 }

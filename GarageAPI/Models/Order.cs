@@ -13,7 +13,9 @@ namespace GarageAPI.Models
         public int OrderId {  get; set; }
 
         [Required]
-        public Customer Customer { get; set; } = new Customer();
+        public Guid CustomerId { get; set; }
+
+        public Customer Customer { get; set; } = null!;
 
         [Required]
         public OrderStatus OrderStatus { get; set; } = OrderStatus.Not_Started;
