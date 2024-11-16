@@ -7,7 +7,6 @@ namespace GarageAPI.ViewModels.Customer
 {
     public class CustomerGetDTO
     {
-        public Guid Id { get; set; }
         public int CustomerId { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
@@ -18,6 +17,12 @@ namespace GarageAPI.ViewModels.Customer
         public string? State { get; set; }
         public string? PostalCode { get; set; }
         public string PhoneNumber { get; set; } = string.Empty;
+        public string CreatedBy { get; set; } = "Admin";
+        [DisplayFormat(DataFormatString = "{dd-MM-yyyy HH:mm:ss}")]
+        public DateTime CreatedDateTime { get; set; } = DateTime.Now;
+        public string LastUpdatedBy { get; set; } = "Admin";
+        [DisplayFormat(DataFormatString = "{dd-MM-yyyy HH:mm:ss}")]
+        public DateTime LastUpdatedDateTime { get; set; } = DateTime.Now;
         public ICollection<Order> Orders { get; } = new List<Order>();
     }
 }

@@ -10,6 +10,10 @@ using GarageAPI.Models;
 using AutoMapper;
 using GarageAPI.ViewModels.Customer;
 using Microsoft.AspNetCore.Http.HttpResults;
+using GarageAPI.Services.Interfaces;
+using NuGet.Configuration;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using Azure.Core;
 
 namespace GarageAPI.Controllers
 {
@@ -17,102 +21,102 @@ namespace GarageAPI.Controllers
     [ApiController]
     public class CustomersController : ControllerBase
     {
-        private readonly DatabaseContext _context;
-        private readonly IMapper _mapper;
+        private readonly ICustomerService _customerService;
 
-        public CustomersController(DatabaseContext context, IMapper mapper)
+        public CustomersController(ICustomerService customerService)
         {
-            _context = context;
-            _mapper = mapper;
+            _customerService = customerService;
         }
 
         // GET: api/Customers
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CustomerGetDTO>>> GetCustomers()
+        public async Task<ActionResult> GetCustomers()
         {
-            var result = await _context.Customers.ToListAsync();
-            List<CustomerGetDTO> mappedCustomer = _mapper.Map<IEnumerable<Customer>, IEnumerable<CustomerGetDTO>>(result).ToList();
-            return mappedCustomer;
+            try
+            {
+                var customers = await _customerService.GetAll();
+                if (customers == null)
+                {
+                    return Ok(new { message = "No customers found" });
+                }
+                //return Ok(new { message = "Successfully retrieved all blog posts", data = todo });
+                return Ok(customers);
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An error occurred while retrieving all customers.", error = ex.Message });
+            }
         }
 
         // GET: api/Customers/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<CustomerUpdateDTO>> GetCustomer(Guid id)
+        public async Task<ActionResult> GetCustomer(int id)
         {
-            var result = await _context.Customers.FindAsync(id);
-            if (result == null)
-            {
-                return NotFound();
-            }
-            var customer = _mapper.Map<Customer, CustomerUpdateDTO>(result);
-            return customer;
-        }
-
-        // PUT: api/Customers/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCustomer(Guid id, CustomerUpdateDTO mappedCustomer)
-        {
-            var customer = _mapper.Map<CustomerUpdateDTO, Customer>(mappedCustomer);
-
-            if (id != customer.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(customer).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                var result = await _customerService.GetCustomerByID(id);
+                if (result == null)
+                {
+                    return NotFound(new { message = $"No Customer with Id {id} found." });
+                }
+                return Ok(result);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex)
             {
-                if (!CustomerExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = $"An error occurred while retrieving the Customer with Id {id}.", error = ex.Message });
             }
-
-            return NoContent();
         }
 
         // POST: api/Customers
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<CustomerCreateDTO>> PostCustomer(CustomerCreateDTO mappedCustomer)
+        public async Task<ActionResult> PostCustomer(CustomerCreateDTO mappedCustomer)
         {
-            var customer = _mapper.Map<CustomerCreateDTO, Customer>(mappedCustomer);
+            try
+            {
+                await _customerService.CreateCustomer(mappedCustomer);
+                return Ok(new { message = "Customer successfully created" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An error occurred while creating the Customer", error = ex.Message });
+            }
+        }
 
-            _context.Customers.Add(customer);
-            await _context.SaveChangesAsync();
+        // PUT: api/Customers/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutCustomer(Guid id, CustomerUpdateDTO customer)
+        {           
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                await _customerService.UpdateCustomer(id, customer);
+                return Ok();
 
-            return CreatedAtAction("GetCustomer", new { id = customer.Id }, customer);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = $"An error occurred while updating cusomer.", error = ex.Message });
+            }
         }
 
         // DELETE: api/Customers/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCustomer(int id)
+        public async Task<IActionResult> DeleteCustomer(Guid id)
         {
-            var customer = await _context.Customers.FindAsync(id);
-            if (customer == null)
+            try
             {
-                return NotFound();
+                await _customerService.DeleteCustomer(id);
+
+                return Ok();
             }
-
-            _context.Customers.Remove(customer);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool CustomerExists(Guid id)
-        {
-            return _context.Customers.Any(e => e.Id == id);
-        }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = $"An error occurred while deleting Todo Item  with id {id}", error = ex.Message });
+            }
+        }       
     }
 }

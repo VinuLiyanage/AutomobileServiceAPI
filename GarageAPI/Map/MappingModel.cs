@@ -10,8 +10,14 @@ namespace GarageAPI.Map
         public MappingModel()
         {
             //Customer 
-            CreateMap<CustomerCreateDTO, Customer>();
-            CreateMap<CustomerUpdateDTO, Customer>();
+            CreateMap<CustomerCreateDTO, Customer>()
+                .ForMember(cust => cust.Id, opt => opt.Ignore())
+                .ForMember(cust => cust.CustomerId, opt => opt.Ignore());
+
+            CreateMap<CustomerUpdateDTO, Customer>()
+                .ForMember(cust => cust.Id, opt => opt.Ignore())
+                .ForMember(cust => cust.CustomerId, opt => opt.Ignore());
+
             CreateMap<Customer, CustomerGetDTO>();
 
             //Item

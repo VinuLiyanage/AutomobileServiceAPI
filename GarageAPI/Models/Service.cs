@@ -7,7 +7,6 @@ namespace GarageAPI.Models
     public class Service
     {
         public Guid Id { get; set; }
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ServiceId { get; set; }
 
         [Required]
@@ -16,5 +15,11 @@ namespace GarageAPI.Models
         public string Name { get; set; } = string.Empty;
 
         public string? Description { get; set; }
+        public DateTime CreatedDateTime { get; set; } = DateTime.Now;
+        [Required]
+        public string LastUpdatedBy { get; set; } = "Admin";
+        [Required]
+        [DisplayFormat(DataFormatString = "{dd-MM-yyyy HH:mm:ss}")]
+        public DateTime LastUpdatedDateTime { get; set; } = DateTime.Now;
     }
 }

@@ -22,33 +22,42 @@ namespace GarageAPI.Models
         public string LastName { get; set; } = String.Empty;
 
         [DisplayName("Address Line 1")]
-        [MaxLength(20)]
+        [MaxLength(30)]
         public string? AddressLine1 { get; set; }
 
         [DisplayName("Address Line 2")]
-        [MaxLength(20)]
+        [MaxLength(30)]
         public string? AddressLine2 { get; set; }
 
         [DisplayName("Address Line 3")]
-        [MaxLength(20)]
+        [MaxLength(30)]
         public string? AddressLine3 { get; set; }
 
         [MaxLength(20)]
         public string? City { get; set; }
 
         [DisplayName("State/Province")]
-        [MaxLength(20)]
+        [MaxLength(15)]
         public string? State { get; set; }
 
         [DisplayName("Postal Code")]
-        [MaxLength(20)]
+        [MaxLength(10)]
         public string? PostalCode { get; set; }
 
         [Required]
         [StringLength(14)]
         [RegularExpression(@"\(\d{3}\) \d{3}-\d{4}")]
         public string PhoneNumber { get; set; } = String.Empty;
-
+        [Required]
+        public string CreatedBy { get; set; } = "Admin";
+        [Required]
+        [DisplayFormat(DataFormatString = "{dd-MM-yyyy HH:mm:ss}")]
+        public DateTime CreatedDateTime { get; set; } = DateTime.Now;
+        [Required]
+        public string LastUpdatedBy { get; set; } = "Admin";
+        [Required]
+        [DisplayFormat(DataFormatString = "{dd-MM-yyyy HH:mm:ss}")]
+        public DateTime LastUpdatedDateTime { get; set; } = DateTime.Now;
         public ICollection<Order> Orders { get; } = new List<Order>();
     }
 }
