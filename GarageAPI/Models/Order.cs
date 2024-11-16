@@ -9,7 +9,6 @@ namespace GarageAPI.Models
     {
         public Guid Id { get; set; }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int OrderId {  get; set; }
 
         [Required]
