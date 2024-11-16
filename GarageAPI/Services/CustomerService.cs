@@ -66,8 +66,8 @@ namespace GarageAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while creating the Customer.");
-                throw new Exception("An error occurred while creating the Customer.", ex);
+                _logger.LogError(ex, "An error occurred while creating the customer.");
+                throw new Exception("An error occurred while creating the customer.", ex);
             }
         }
 
@@ -119,7 +119,7 @@ namespace GarageAPI.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"An error occurred while updating the customer with id {id}.");
-                throw new Exception($"An error occurred while updating the Customer. {ex}");
+                throw new Exception($"An error occurred while updating the customer. {ex}");
             }
         }
 
@@ -137,8 +137,8 @@ namespace GarageAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while deleting the Customer.");
-                throw new Exception("An error occurred while deleting the Customer. \n", ex);
+                _logger.LogError(ex, "An error occurred while deleting the customer.");
+                throw new Exception("An error occurred while deleting the customer. \n", ex);
             }
         }
 
