@@ -4,14 +4,8 @@ using GarageAPI.Database;
 using GarageAPI.Models;
 using GarageAPI.Services.Interfaces;
 using GarageAPI.ViewModels.Customer;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Linq;
-using System;
 using System.Reflection;
-using System.Reflection.Emit;
-using System.Runtime.ConstrainedExecution;
 
 namespace GarageAPI.Services
 {
@@ -34,7 +28,7 @@ namespace GarageAPI.Services
             var customers = await _context.Customers.ToListAsync();
             if (customers == null)
             {
-                throw new Exception(" No Todo items found");
+                throw new Exception(" No customers found");
             }
             var mappedCustomer = _mapper.Map<IEnumerable<Customer>, IEnumerable<CustomerGetDTO>>(customers);
             return mappedCustomer;
