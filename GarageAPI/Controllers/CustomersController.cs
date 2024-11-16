@@ -1,19 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using GarageAPI.Database;
-using GarageAPI.Models;
-using AutoMapper;
+﻿using Microsoft.AspNetCore.Mvc;
 using GarageAPI.ViewModels.Customer;
-using Microsoft.AspNetCore.Http.HttpResults;
 using GarageAPI.Services.Interfaces;
-using NuGet.Configuration;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using Azure.Core;
 
 namespace GarageAPI.Controllers
 {

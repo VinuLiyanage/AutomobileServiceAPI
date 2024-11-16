@@ -1,15 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using GarageAPI.Database;
-using GarageAPI.Models;
-using GarageAPI.ViewModels.Customer;
-using AutoMapper;
+﻿using Microsoft.AspNetCore.Mvc;
 using GarageAPI.ViewModels.Item;
+using GarageAPI.Services.Interfaces;
 
 namespace GarageAPI.Controllers
 {
@@ -17,102 +8,102 @@ namespace GarageAPI.Controllers
     [ApiController]
     public class ItemsController : ControllerBase
     {
-        private readonly DatabaseContext _context;
-        private readonly IMapper _mapper;
+        private readonly IItemService _itemService;
 
-        public ItemsController(DatabaseContext context, IMapper mapper)
+        public ItemsController(IItemService itemService)
         {
-            _context = context;
-            _mapper = mapper;
+            _itemService = itemService;
         }
 
         // GET: api/Items
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ItemGetDTO>>> GetItems()
+        public async Task<ActionResult> GetItems()
         {
-            var result = await _context.Items.ToListAsync();
-            List<ItemGetDTO> mappedItem = _mapper.Map<IEnumerable<Item>, IEnumerable<ItemGetDTO>>(result).ToList();
-            return mappedItem;
+            try
+            {
+                var items = await _itemService.GetAll();
+                if (items == null)
+                {
+                    return Ok(new { message = "No items found" });
+                }
+                //return Ok(new { message = "Successfully retrieved all blog posts", data = todo });
+                return Ok(items);
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An error occurred while retrieving all items.", error = ex.Message });
+            }
         }
 
         // GET: api/Items/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ItemGetDTO>> GetItem(Guid id)
+        public async Task<ActionResult> GetItem(int id)
         {
-            var result = await _context.Items.FindAsync(id);
-
-            if (result == null)
-            {
-                return NotFound();
-            }
-            var item = _mapper.Map<Item, ItemGetDTO>(result);
-            return item;
-        }
-
-        // PUT: api/Items/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutItem(Guid id, ItemUpdateDTO mappedItem)
-        {
-            var item = _mapper.Map<ItemUpdateDTO, Item>(mappedItem);
-
-            if (id != item.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(item).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                var result = await _itemService.GetItemByID(id);
+                if (result == null)
+                {
+                    return NotFound(new { message = $"No Item with Id {id} found." });
+                }
+                return Ok(result);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex)
             {
-                if (!ItemExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = $"An error occurred while retrieving the Item with Id {id}.", error = ex.Message });
             }
-
-            return NoContent();
         }
 
         // POST: api/Items
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<ItemCreateDTO>> PostItem(ItemCreateDTO mappedItem)
+        public async Task<ActionResult> PostItem(ItemCreateDTO mappedItem)
         {
-            var item = _mapper.Map<ItemCreateDTO, Item>(mappedItem);
-            _context.Items.Add(item);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _itemService.CreateItem(mappedItem);
+                return Ok(new { message = "Item successfully created" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An error occurred while creating the Item", error = ex.Message });
+            }
+        }
 
-            return CreatedAtAction("GetItem", new { id = item.Id }, item);
+        // PUT: api/Items/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutItem(Guid id, ItemUpdateDTO item)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                await _itemService.UpdateItem(id, item);
+                return Ok();
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = $"An error occurred while updating cusomer.", error = ex.Message });
+            }
         }
 
         // DELETE: api/Items/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteItem(int id)
+        public async Task<IActionResult> DeleteItem(Guid id)
         {
-            var item = await _context.Items.FindAsync(id);
-            if (item == null)
+            try
             {
-                return NotFound();
+                await _itemService.DeleteItem(id);
+
+                return Ok();
             }
-
-            _context.Items.Remove(item);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool ItemExists(Guid id)
-        {
-            return _context.Items.Any(e => e.Id == id);
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = $"An error occurred while deleting Todo Item  with id {id}", error = ex.Message });
+            }
         }
     }
 }

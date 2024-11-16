@@ -21,8 +21,14 @@ namespace GarageAPI.Map
             CreateMap<Customer, CustomerGetDTO>();
 
             //Item
-            CreateMap<ItemCreateDTO, Item>();
-            CreateMap<ItemUpdateDTO, Item>();
+            CreateMap<ItemCreateDTO, Item>()
+                .ForMember(item => item.Id, opt => opt.Ignore())
+                .ForMember(item => item.ItemId, opt => opt.Ignore());
+
+            CreateMap<ItemUpdateDTO, Item>()
+                .ForMember(item => item.Id, opt => opt.Ignore())
+                .ForMember(item => item.ItemId, opt => opt.Ignore());
+
             CreateMap<Item, ItemGetDTO>();
         }
     }
