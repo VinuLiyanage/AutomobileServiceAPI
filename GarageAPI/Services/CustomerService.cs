@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Azure.Core;
 using GarageAPI.Database;
 using GarageAPI.Models;
 using GarageAPI.Services.Interfaces;

@@ -1,5 +1,4 @@
-﻿using GarageAPI.Common;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GarageAPI.Models
@@ -14,7 +13,7 @@ namespace GarageAPI.Models
         public string Name { get; set; } = string.Empty;
         [MaxLength(100)]
         public string? Description { get; set; }
-        public ItemOrService ItemOrService { get; set; }
+        public bool IsService { get; set; } = false; // True if it's a service
         public string CreatedBy { get; set; } = "Admin";
 
         [DisplayFormat(DataFormatString = "{dd-MM-yyyy HH:mm:ss}")]
@@ -24,5 +23,6 @@ namespace GarageAPI.Models
         [Required]
         [DisplayFormat(DataFormatString = "{dd-MM-yyyy HH:mm:ss}")]
         public DateTime LastUpdatedDateTime { get; set; } = DateTime.Now;
+        public ICollection<OrdersItem> OrdersItem { get; set; } // Navigation property for the many-to-many relationship
     }
 }

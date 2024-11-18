@@ -1,5 +1,4 @@
-﻿using GarageAPI.Models;
-using GarageAPI.ViewModels.Customer;
+﻿using GarageAPI.ViewModels.Customer;
 
 namespace GarageAPI.Services.Interfaces
 {

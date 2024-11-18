@@ -1,7 +1,4 @@
-﻿using GarageAPI.Models;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace GarageAPI.ViewModels.Customer
 {
@@ -23,6 +20,5 @@ namespace GarageAPI.ViewModels.Customer
         public string LastUpdatedBy { get; set; } = "Admin";
         [DisplayFormat(DataFormatString = "{dd-MM-yyyy HH:mm:ss}")]
         public DateTime LastUpdatedDateTime { get; set; } = DateTime.Now;
-        public ICollection<Order> Orders { get; } = new List<Order>();
     }
 }

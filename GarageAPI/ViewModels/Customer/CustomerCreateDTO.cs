@@ -1,5 +1,4 @@
-﻿using GarageAPI.Models;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace GarageAPI.ViewModels.Customer
 {

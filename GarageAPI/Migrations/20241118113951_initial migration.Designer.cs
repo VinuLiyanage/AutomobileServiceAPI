@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GarageAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20241114132046_Initial Create")]
-    partial class InitialCreate
+    [Migration("20241118113951_initial migration")]
+    partial class initialmigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -101,6 +101,10 @@ namespace GarageAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedDateTime")
                         .HasColumnType("datetime2");
 
@@ -108,8 +112,14 @@ namespace GarageAPI.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<bool>("IsService")
+                        .HasColumnType("bit");
+
                     b.Property<int>("ItemId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ItemId"));
 
                     b.Property<string>("LastUpdatedBy")
                         .IsRequired()
@@ -134,11 +144,28 @@ namespace GarageAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDateTime")
+                        .HasColumnType("datetime2");
+
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("LastUpdatedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("LastUpdatedDateTime")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("OrderId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
 
                     b.Property<int>("OrderStatus")
                         .HasColumnType("int");
@@ -159,36 +186,31 @@ namespace GarageAPI.Migrations
                     b.ToTable("Orders");
                 });
 
-            modelBuilder.Entity("GarageAPI.Models.Service", b =>
+            modelBuilder.Entity("GarageAPI.Models.OrdersItem", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDateTime")
-                        .HasColumnType("datetime2");
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LastUpdatedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("LastUpdatedDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<int>("ServiceId")
+                    b.Property<int>("ItemNo")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.Property<int?>("Quantity")
+                        .HasColumnType("int");
 
-                    b.ToTable("Services");
+                    b.Property<float>("Total")
+                        .HasColumnType("real");
+
+                    b.HasKey("OrderId", "ItemId");
+
+                    b.HasIndex("ItemId");
+
+                    b.ToTable("OrdersItems");
                 });
 
             modelBuilder.Entity("GarageAPI.Models.Order", b =>
@@ -202,9 +224,38 @@ namespace GarageAPI.Migrations
                     b.Navigation("Customer");
                 });
 
+            modelBuilder.Entity("GarageAPI.Models.OrdersItem", b =>
+                {
+                    b.HasOne("GarageAPI.Models.Item", "Item")
+                        .WithMany("OrdersItem")
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GarageAPI.Models.Order", "Order")
+                        .WithMany("OrdersItem")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+
+                    b.Navigation("Order");
+                });
+
             modelBuilder.Entity("GarageAPI.Models.Customer", b =>
                 {
                     b.Navigation("Orders");
+                });
+
+            modelBuilder.Entity("GarageAPI.Models.Item", b =>
+                {
+                    b.Navigation("OrdersItem");
+                });
+
+            modelBuilder.Entity("GarageAPI.Models.Order", b =>
+                {
+                    b.Navigation("OrdersItem");
                 });
 #pragma warning restore 612, 618
         }
