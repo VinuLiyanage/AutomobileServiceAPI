@@ -22,8 +22,9 @@ namespace GarageAPI.Models
         [Required]
         [DisplayName("Sub Total")]
         public float SubTotal { get; set; } = 0;
+        [Required]
         public string CreatedBy { get; set; } = "Admin";
-
+        [Required]
         [DisplayFormat(DataFormatString = "{dd-MM-yyyy HH:mm:ss}")]
         public DateTime CreatedDateTime { get; set; } = DateTime.Now;
         [Required]
