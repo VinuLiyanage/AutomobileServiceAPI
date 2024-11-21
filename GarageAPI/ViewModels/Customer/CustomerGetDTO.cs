@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using GarageAPI.ViewModels.Order;
+using System.ComponentModel.DataAnnotations;
 
 namespace GarageAPI.ViewModels.Customer
 {

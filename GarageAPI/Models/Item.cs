@@ -23,6 +23,6 @@ namespace GarageAPI.Models
         [Required]
         [DisplayFormat(DataFormatString = "{dd-MM-yyyy HH:mm:ss}")]
         public DateTime LastUpdatedDateTime { get; set; } = DateTime.Now;
-        public ICollection<OrdersItem> OrdersItem { get; set; } // Navigation property for the many-to-many relationship
+        public ICollection<OrdersItem> OrdersItem { get; set; } = new List<OrdersItem>(); // Navigation property for the many-to-many relationship
     }
 }

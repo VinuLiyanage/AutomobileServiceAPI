@@ -58,6 +58,6 @@ namespace GarageAPI.Models
         [Required]
         [DisplayFormat(DataFormatString = "{dd-MM-yyyy HH:mm:ss}")]
         public DateTime LastUpdatedDateTime { get; set; } = DateTime.Now;
-        public List<Order> Orders { get; } = [];
+        public ICollection<Order>? Orders { get; set; } // Collection navigation containing dependents
     }
 }

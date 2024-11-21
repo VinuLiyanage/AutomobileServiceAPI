@@ -27,7 +27,7 @@ namespace GarageAPI.Services
         //Retrieve all orders
         public async Task<IEnumerable<OrderGetDTO>> GetAll()
         {
-            var orders = await _context.Orders.Include(x => x.OrdersItem).ToListAsync();
+            var orders = await _context.Orders.Include(x => x.OrdersItem).Include(x => x.Customer).ToListAsync();
 
             if (orders == null)
             {
@@ -61,8 +61,7 @@ namespace GarageAPI.Services
                 mappedOrder.LastUpdatedBy = "Admin";
                 mappedOrder.LastUpdatedDateTime = DateTime.Now;
 
-                //List<OrdersItem> ordersItems = new List<OrdersItem>();
-                var mappedOrderItem = _mapper.Map<List<OrdersItemCreateDTO>, List<OrdersItem>>(order.OrdersItems);
+                var mappedOrderItem = _mapper.Map<ICollection<OrdersItemCreateDTO>, ICollection<OrdersItem>>(order.OrdersItem);
                 int itemNo = 1;
                 foreach (var mappeditem in mappedOrderItem)
                 {
@@ -72,21 +71,12 @@ namespace GarageAPI.Services
                     mappeditem.CreatedDateTime = DateTime.Now;
                     mappeditem.LastUpdatedBy = "Admin";
                     mappeditem.LastUpdatedDateTime = DateTime.Now;
-
-                    //OrdersItem item = new OrdersItem();
-                    //item.OrderId = mappeditem.OrderId;
-                    //item.ItemId = mappeditem.ItemId;
-                    //item.ItemNo = itemNo;
-                    //item.Quantity = mappeditem.Quantity;
-                    //item.Total = mappeditem.Total;
-                    //item.Description = mappeditem.Description;
-             
-                    //ordersItems.Add(item);
                     
                     _context.OrdersItems.Add(mappeditem);
-
+                    
                     itemNo++;
                 }
+                mappedOrder.OrdersItem = mappedOrderItem;
                 _context.Orders.Add(mappedOrder);
                 await _context.SaveChangesAsync();
             }
@@ -101,43 +91,47 @@ namespace GarageAPI.Services
         {
             try
             {
-                var result = await _context.Orders.Include(x => x.OrdersItem).FirstOrDefaultAsync(x => x.Id == id);
+                var result = await _context.Orders.Include(x => x.OrdersItem.OrderBy(oi => oi.ItemId)).FirstOrDefaultAsync(x => x.Id == id);
                 if (result == null)
                 {
                     throw new Exception($"Order with id {id} not found.");
                 }
                 var mappedOrder = _mapper.Map<OrderUpdateDTO, Order>(order);
 
-                PropertyInfo[] contextProp = result.GetType().GetProperties();
-                PropertyInfo[] custDTOProp = order.GetType().GetProperties();
-
-                int i = 0;
-                foreach (PropertyInfo property in contextProp)
-                {
-                    if (custDTOProp.Length < i + 2) // i dosen't count Id and OrderId. So we add 2
-                    {
-                        break;
-                    }
-
-                    if (property.Name != "Id" && property.Name != "OrderId")
-                    {
-                        if (property.Name == custDTOProp[i].Name)
-                        {
-                            property.SetValue(result, custDTOProp[i].GetValue(order));
-                            i++;
-                        }
-                        else
-                        {
-                            _logger.LogError(null, "Property names are not matched when assigning values");
-                            throw new Exception($"Property names are not matched when assigning values.");
-                        }
-                    }
-
-                }
-
+                result.CustomerId = mappedOrder.CustomerId;
+                result.OrderStatus = mappedOrder.OrderStatus;
+                result.Total = mappedOrder.Total;
+                result.Tax = mappedOrder.Tax;
+                result.SubTotal = mappedOrder.SubTotal;                
                 result.LastUpdatedBy = "Admin";
                 result.LastUpdatedDateTime = DateTime.Now;
 
+                foreach (var item in result.OrdersItem)
+                {
+                    var orderItems = await _context.OrdersItems.FindAsync(id, item.ItemId);
+                    if (orderItems != null)
+                    {
+                        _context.OrdersItems.Remove(orderItems);
+                    }
+                }
+            
+                var mappedOrderItem = _mapper.Map<ICollection<OrdersItemUpdateDTO>, ICollection<OrdersItem>>(order.OrdersItem);             
+                               
+                int itemNo = 1;
+                
+                foreach (var mappeditem in mappedOrderItem)
+                {
+                    mappeditem.OrderId = id;
+                    mappeditem.ItemNo = itemNo;
+                    mappeditem.LastUpdatedBy = "Admin";
+                    mappeditem.LastUpdatedDateTime = DateTime.Now;
+
+                    _context.OrdersItems.Add(mappeditem);
+
+                    itemNo++;
+                }
+               
+                result.OrdersItem = mappedOrderItem;
 
                 await _context.SaveChangesAsync();
             }
@@ -153,10 +147,18 @@ namespace GarageAPI.Services
         {
             try
             {
-                var order = await _context.Orders.FindAsync(id);
+                var order = await _context.Orders.Include(x => x.OrdersItem).FirstOrDefaultAsync(x => x.Id == id);
                 if (order == null)
                 {
                     throw new Exception($"No order found with the given id");
+                }
+                foreach (var item in order.OrdersItem)
+                {
+                    var orderItems = await _context.OrdersItems.FindAsync(id, item.ItemId);
+                    if (orderItems != null)
+                    {
+                        _context.OrdersItems.Remove(orderItems);
+                    }
                 }
                 _context.Orders.Remove(order);
                 await _context.SaveChangesAsync();

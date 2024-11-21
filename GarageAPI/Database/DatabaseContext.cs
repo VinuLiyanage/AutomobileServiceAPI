@@ -1,5 +1,7 @@
 ﻿using GarageAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
+using System.Reflection.Metadata;
 
 namespace GarageAPI.Database
 {
@@ -14,11 +16,18 @@ namespace GarageAPI.Database
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Configure composite key for StudentCourse
+            // Configure the relationships for Customer
+            modelBuilder.Entity<Customer>()
+                .HasMany(e => e.Orders)
+                .WithOne(e => e.Customer)
+                .HasForeignKey(e => e.CustomerId)
+                .IsRequired();
+
+            // Configure composite key for OrdersItem
             modelBuilder.Entity<OrdersItem>()
                 .HasKey(oi => new { oi.OrderId, oi.ItemId });
 
-            // Configure the relationships
+            // Configure the relationships for OrdersItem
             modelBuilder.Entity<OrdersItem>()
                 .HasOne(oi => oi.Item)
                 .WithMany(i => i.OrdersItem)

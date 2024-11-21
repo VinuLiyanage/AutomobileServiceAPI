@@ -12,6 +12,6 @@ namespace GarageAPI.ViewModels.Order
         public float Tax { get; set; } = 0;
         [DisplayName("Sub Total")]
         public float SubTotal { get; set; } = 0;
-        public List<OrdersItemCreateDTO> OrdersItems { get; set; } = new List<OrdersItemCreateDTO>();
+        public ICollection<OrdersItemCreateDTO> OrdersItem { get; set; } = new List<OrdersItemCreateDTO>();
     }
 }

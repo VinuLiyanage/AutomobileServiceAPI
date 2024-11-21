@@ -4,6 +4,7 @@ using GarageAPI.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GarageAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20241118191135_order and orderItems changes")]
+    partial class orderandorderItemschanges
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -89,7 +92,7 @@ namespace GarageAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Customers", (string)null);
+                    b.ToTable("Customers");
                 });
 
             modelBuilder.Entity("GarageAPI.Models.Item", b =>
@@ -132,7 +135,7 @@ namespace GarageAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Items", (string)null);
+                    b.ToTable("Items");
                 });
 
             modelBuilder.Entity("GarageAPI.Models.Order", b =>
@@ -180,7 +183,7 @@ namespace GarageAPI.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("GarageAPI.Models.OrdersItem", b =>
@@ -221,7 +224,7 @@ namespace GarageAPI.Migrations
 
                     b.HasIndex("ItemId");
 
-                    b.ToTable("OrdersItems", (string)null);
+                    b.ToTable("OrdersItems");
                 });
 
             modelBuilder.Entity("GarageAPI.Models.Order", b =>
