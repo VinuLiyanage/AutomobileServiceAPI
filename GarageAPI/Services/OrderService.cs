@@ -2,8 +2,11 @@
 using GarageAPI.Database;
 using GarageAPI.Models;
 using GarageAPI.Services.Interfaces;
+using GarageAPI.ViewModels.Item;
 using GarageAPI.ViewModels.Order;
+using GarageAPI.ViewModels.OrdersItem;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace GarageAPI.Services
@@ -24,18 +27,20 @@ namespace GarageAPI.Services
         //Retrieve all orders
         public async Task<IEnumerable<OrderGetDTO>> GetAll()
         {
-            var orders = await _context.Orders.ToListAsync();
+            var orders = await _context.Orders.Include(x => x.OrdersItem).ToListAsync();
+
             if (orders == null)
             {
-                throw new Exception(" No orders found");
+                throw new Exception("No orders found");
             }
             var mappedOrder = _mapper.Map<IEnumerable<Order>, IEnumerable<OrderGetDTO>>(orders);
+
             return mappedOrder;
         }
 
         public async Task<OrderGetDTO> GetOrderByID(int id)
         {
-            var order = await _context.Orders.FirstOrDefaultAsync(x => x.OrderId == id);
+            var order = await _context.Orders.Include(x => x.OrdersItem).FirstOrDefaultAsync(x => x.OrderId == id);
             if (order == null)
             {
                 _logger.LogError(null, $"No order with Id {id} found.");
@@ -49,13 +54,39 @@ namespace GarageAPI.Services
             try
             {
                 var mappedOrder = _mapper.Map<OrderCreateDTO, Order>(order);
+                
+                mappedOrder.Id = Guid.NewGuid();
                 mappedOrder.CreatedBy = "Admin";
                 mappedOrder.CreatedDateTime = DateTime.Now;
                 mappedOrder.LastUpdatedBy = "Admin";
                 mappedOrder.LastUpdatedDateTime = DateTime.Now;
 
-                
+                //List<OrdersItem> ordersItems = new List<OrdersItem>();
+                var mappedOrderItem = _mapper.Map<List<OrdersItemCreateDTO>, List<OrdersItem>>(order.OrdersItems);
+                int itemNo = 1;
+                foreach (var mappeditem in mappedOrderItem)
+                {
+                    mappeditem.OrderId = mappedOrder.Id;
+                    mappeditem.ItemNo = itemNo;
+                    mappeditem.CreatedBy = "Admin";
+                    mappeditem.CreatedDateTime = DateTime.Now;
+                    mappeditem.LastUpdatedBy = "Admin";
+                    mappeditem.LastUpdatedDateTime = DateTime.Now;
 
+                    //OrdersItem item = new OrdersItem();
+                    //item.OrderId = mappeditem.OrderId;
+                    //item.ItemId = mappeditem.ItemId;
+                    //item.ItemNo = itemNo;
+                    //item.Quantity = mappeditem.Quantity;
+                    //item.Total = mappeditem.Total;
+                    //item.Description = mappeditem.Description;
+             
+                    //ordersItems.Add(item);
+                    
+                    _context.OrdersItems.Add(mappeditem);
+
+                    itemNo++;
+                }
                 _context.Orders.Add(mappedOrder);
                 await _context.SaveChangesAsync();
             }
@@ -70,7 +101,7 @@ namespace GarageAPI.Services
         {
             try
             {
-                var result = await _context.Orders.FindAsync(id);
+                var result = await _context.Orders.Include(x => x.OrdersItem).FirstOrDefaultAsync(x => x.Id == id);
                 if (result == null)
                 {
                     throw new Exception($"Order with id {id} not found.");
