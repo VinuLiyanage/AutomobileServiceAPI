@@ -1,4 +1,5 @@
 ﻿using GarageAPI.Common;
+using GarageAPI.ViewModels.OrdersItem;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
@@ -15,6 +16,7 @@ namespace GarageAPI.ViewModels.Order
 
         [DisplayName("Sub Total")]
         public float SubTotal { get; set; } = 0;
+        public string CreatedBy { get; set; } = "Admin";
 
         [DisplayFormat(DataFormatString = "{dd-MM-yyyy HH:mm:ss}")]
         public DateTime CreatedDateTime { get; set; } = DateTime.Now;
@@ -22,5 +24,6 @@ namespace GarageAPI.ViewModels.Order
 
         [DisplayFormat(DataFormatString = "{dd-MM-yyyy HH:mm:ss}")]
         public DateTime LastUpdatedDateTime { get; set; } = DateTime.Now;
+        public List<OrdersItemGetDTO> OrdersItem { get; set; }
     }
 }

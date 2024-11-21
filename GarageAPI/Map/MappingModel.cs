@@ -2,6 +2,8 @@
 using GarageAPI.ViewModels.Customer;
 using GarageAPI.Models;
 using GarageAPI.ViewModels.Item;
+using GarageAPI.ViewModels.Order;
+using GarageAPI.ViewModels.OrdersItem;
 
 namespace GarageAPI.Map
 {
@@ -30,6 +32,21 @@ namespace GarageAPI.Map
                 .ForMember(item => item.ItemId, opt => opt.Ignore());
 
             CreateMap<Item, ItemGetDTO>();
+
+            //Order
+            CreateMap<OrderCreateDTO, Order>()
+                .ForMember(item => item.OrderId, opt => opt.Ignore());
+
+            CreateMap<OrderUpdateDTO, Order>()
+                .ForMember(item => item.OrderId, opt => opt.Ignore());
+
+            CreateMap<Order, OrderGetDTO>();
+
+            //Orders Item
+            CreateMap<OrdersItemCreateDTO, OrdersItem>()
+                .ForMember(item => item.OrderId, opt => opt.Ignore());
+            CreateMap<OrdersItemUpdateDTO, OrdersItem>();
+            CreateMap<OrdersItem, OrdersItemGetDTO>();
         }
     }
 }

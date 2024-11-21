@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using GarageAPI.Database;
-using GarageAPI.Models;
+﻿using Microsoft.AspNetCore.Mvc;
+using GarageAPI.Services.Interfaces;
+using GarageAPI.ViewModels.Order;
 
 namespace GarageAPI.Controllers
 {
@@ -14,95 +8,102 @@ namespace GarageAPI.Controllers
     [ApiController]
     public class OrdersController : ControllerBase
     {
-        private readonly DatabaseContext _context;
+        private readonly IOrderService _orderService;
 
-        public OrdersController(DatabaseContext context)
+        public OrdersController(IOrderService orderService)
         {
-            _context = context;
+            _orderService = orderService;
         }
 
         // GET: api/Orders
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Order>>> GetOrders()
+        public async Task<ActionResult> GetOrders()
         {
-            return await _context.Orders.ToListAsync();
+            try
+            {
+                var orders = await _orderService.GetAll();
+                if (orders == null)
+                {
+                    return Ok(new { message = "No orders found" });
+                }
+                //return Ok(new { message = "Successfully retrieved all blog posts", data = todo });
+                return Ok(orders);
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An error occurred while retrieving all orders.", error = ex.Message });
+            }
         }
 
         // GET: api/Orders/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Order>> GetOrder(Guid id)
+        public async Task<ActionResult> GetOrder(int id)
         {
-            var order = await _context.Orders.FindAsync(id);
-
-            if (order == null)
-            {
-                return NotFound();
-            }
-
-            return order;
-        }
-
-        // PUT: api/Orders/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutOrder(Guid id, Order order)
-        {
-            if (id != order.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(order).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                var result = await _orderService.GetOrderByID(id);
+                if (result == null)
+                {
+                    return NotFound(new { message = $"No Order with Id {id} found." });
+                }
+                return Ok(result);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex)
             {
-                if (!OrderExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = $"An error occurred while retrieving the Order with Id {id}.", error = ex.Message });
             }
-
-            return NoContent();
         }
 
         // POST: api/Orders
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Order>> PostOrder(Order order)
+        public async Task<ActionResult> PostOrder(OrderCreateDTO mappedOrder)
         {
-            _context.Orders.Add(order);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _orderService.CreateOrder(mappedOrder);
+                return Ok(new { message = "Order successfully created" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An error occurred while creating the Order", error = ex.Message });
+            }
+        }
 
-            return CreatedAtAction("GetOrder", new { id = order.Id }, order);
+        // PUT: api/Orders/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutOrder(Guid id, OrderUpdateDTO order)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                await _orderService.UpdateOrder(id, order);
+                return Ok();
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = $"An error occurred while updating cusomer.", error = ex.Message });
+            }
         }
 
         // DELETE: api/Orders/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrder(Guid id)
         {
-            var order = await _context.Orders.FindAsync(id);
-            if (order == null)
+            try
             {
-                return NotFound();
+                await _orderService.DeleteOrder(id);
+
+                return Ok();
             }
-
-            _context.Orders.Remove(order);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool OrderExists(Guid id)
-        {
-            return _context.Orders.Any(e => e.Id == id);
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = $"An error occurred while deleting Todo Item  with id {id}", error = ex.Message });
+            }
         }
     }
 }
